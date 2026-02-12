@@ -1,0 +1,24 @@
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.14.0
+
+# Data Access
+requests>=2.31.0
+gitpython>=3.1.0
+
+# Reporting
+openpyxl>=3.1.0
+jinja2>=3.1.0
+
+# Database (optional)
+# sqlite3 is built-in
+
+# Testing (optional)
+pytest>=7.4.0
+pytest-cov>=4.1.0
