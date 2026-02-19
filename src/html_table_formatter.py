@@ -1,22 +1,13 @@
 """
-HTML table formatter for Swaption Vol Table with color coding
+HTML table formatter for Swaption Vol Table
 """
 import pandas as pd
 import numpy as np
 from datetime import date
 
 
-def format_table_html(table: pd.DataFrame, as_of_date: date) -> str:
-    """
-    Format table as HTML with Nomura-style colors
-    
-    Args:
-        table: Swaption vol table DataFrame
-        as_of_date: Date of the table
-        
-    Returns:
-        HTML string
-    """
+def format_table_html(table, as_of_date):
+    """Format table as HTML with color coding"""
     html = f"""
     <style>
         .vol-table {{

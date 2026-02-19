@@ -1,5 +1,5 @@
 """
-Excel formatter for Swaption Vol Table - Nomura-style formatting
+Excel formatter for Swaption Vol Table
 """
 import pandas as pd
 import numpy as np
@@ -7,26 +7,11 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from datetime import date
-from typing import Optional
 from pathlib import Path
 
 
-def format_swaption_vol_table_excel(
-    table: pd.DataFrame,
-    as_of_date: date,
-    output_file: Optional[str] = None
-) -> str:
-    """
-    Format Swaption Vol Table as Excel file with Nomura-style formatting
-    
-    Args:
-        table: Swaption vol table DataFrame
-        as_of_date: Date of the table
-        output_file: Output filename (default: swaption_vol_table_YYYY-MM-DD.xlsx)
-        
-    Returns:
-        Path to created Excel file
-    """
+def format_swaption_vol_table_excel(table, as_of_date, output_file=None):
+    """Format table as Excel with Nomura-style formatting"""
     if output_file is None:
         # Save to outputs/tables/ directory
         output_dir = Path(__file__).parent.parent.parent / "outputs" / "tables"
@@ -275,16 +260,8 @@ def format_swaption_vol_table_excel(
     return output_file
 
 
-def format_negative_values(value: float) -> str:
-    """
-    Format negative values with parentheses (accounting style)
-    
-    Args:
-        value: Numeric value
-        
-    Returns:
-        Formatted string
-    """
+def format_negative_values(value):
+    """Format negative values with parentheses"""
     if pd.isna(value):
         return ""
     if value < 0:
