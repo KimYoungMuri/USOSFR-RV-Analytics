@@ -5,4 +5,4 @@ echo "Starting Swaption Vol Table UI..."
 echo "Open your browser to the URL shown below"
 echo ""
 
-streamlit run app.py
+streamlit run scripts/app.py

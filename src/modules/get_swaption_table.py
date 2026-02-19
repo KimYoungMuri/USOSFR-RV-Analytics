@@ -167,6 +167,9 @@ if __name__ == "__main__":
     print(table.head(10))
     
     # Save to CSV
-    csv_file = f'swaption_vol_table_{as_of_date}.csv'
+    from pathlib import Path
+    output_dir = Path(__file__).parent.parent.parent / "outputs" / "tables"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    csv_file = output_dir / f'swaption_vol_table_{as_of_date}.csv'
     table.to_csv(csv_file, index=False)
     print(f"\n✓ Saved to: {csv_file}")

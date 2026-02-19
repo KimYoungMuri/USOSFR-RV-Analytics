@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import date
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.modules.swaption_vol_table import build_swaption_vol_table
 from src.data.data_loader import VolCube420Loader, SOFRLoader

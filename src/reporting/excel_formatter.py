@@ -8,6 +8,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from datetime import date
 from typing import Optional
+from pathlib import Path
 
 
 def format_swaption_vol_table_excel(
@@ -27,7 +28,13 @@ def format_swaption_vol_table_excel(
         Path to created Excel file
     """
     if output_file is None:
-        output_file = f'swaption_vol_table_{as_of_date}.xlsx'
+        # Save to outputs/tables/ directory
+        output_dir = Path(__file__).parent.parent.parent / "outputs" / "tables"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_file = str(output_dir / f'swaption_vol_table_{as_of_date}.xlsx')
+    else:
+        # If path provided, ensure it's a string
+        output_file = str(output_file)
     
     # Create workbook
     wb = Workbook()

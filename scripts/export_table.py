@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 from datetime import date, datetime
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.modules.get_swaption_table import get_swaption_table_excel, get_swaption_table_latest
 

@@ -286,12 +286,26 @@ US Vol RV Analytics/
 │   │   └── html_table_formatter.py # HTML formatter
 │   └── utils/
 │       └── config.py              # Configuration
+├── scripts/
+│   ├── app.py                     # Streamlit UI
+│   ├── export_table.py            # Excel export script
+│   ├── view_table.py              # Table viewer
+│   ├── plot_sofr_rates.py         # SOFR rates plotting
+│   └── test_swaption_table_simple.py # Test script
+├── docs/
+│   ├── README_FOCUSED.md          # Detailed project plan
+│   ├── UI_GUIDE.md                # UI usage guide
+│   ├── USAGE.md                   # Usage documentation
+│   └── PROJECT_STRUCTURE.md       # Project structure doc
+├── outputs/
+│   ├── tables/                    # CSV/XLSX exports
+│   └── plots/                      # PNG plots
 ├── data/
 │   ├── raw/volcube420/            # Cached VolCube420 data
-│   └── historical/               # SOFR Excel files
-├── app.py                         # Streamlit UI
-├── export_table.py                # Excel export script
-└── view_table.py                  # Table viewer
+│   └── historical/                # SOFR Excel files
+├── README.md                      # Main documentation
+├── requirements.txt               # Dependencies
+└── run_ui.sh                      # UI launcher script
 ```
 
 ## Key Calculations
@@ -334,19 +348,19 @@ delivered_directionality = calculate_historical_correlation(
 ### View Table
 
 ```bash
-python view_table.py --date 2024-12-31
+python scripts/view_table.py --date 2024-12-31
 ```
 
 ### Export to Excel
 
 ```bash
-python export_table.py --date 2024-12-31
+python scripts/export_table.py --date 2024-12-31
 ```
 
 ### Run UI
 
 ```bash
-streamlit run app.py
+streamlit run scripts/app.py
 ```
 
 Or use the shell script:

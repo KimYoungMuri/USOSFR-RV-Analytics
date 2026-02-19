@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.data.data_loader import SOFRLoader
 
@@ -74,7 +74,9 @@ fig.autofmt_xdate()
 plt.tight_layout()
 
 # Save the plot
-output_file = 'sofr_rates_plot.png'
+output_dir = Path(__file__).parent.parent / "outputs" / "plots"
+output_dir.mkdir(parents=True, exist_ok=True)
+output_file = output_dir / 'sofr_rates_plot.png'
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f"\n✓ Plot saved to: {output_file}")
 

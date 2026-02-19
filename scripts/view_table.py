@@ -10,7 +10,7 @@ from pathlib import Path
 from datetime import date, datetime
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.modules.get_swaption_table import get_swaption_table, get_swaption_table_latest
 
@@ -93,7 +93,9 @@ if len(sample) > 0:
         print(f"  {window}d: {val:.2f} bp" if not pd.isna(val) else f"  {window}d: N/A")
 
 # Save to CSV
-csv_file = f'swaption_vol_table_{as_of_date if isinstance(as_of_date, date) else "latest"}.csv'
+output_dir = Path(__file__).parent.parent / "outputs" / "tables"
+output_dir.mkdir(parents=True, exist_ok=True)
+csv_file = output_dir / f'swaption_vol_table_{as_of_date if isinstance(as_of_date, date) else "latest"}.csv'
 table.to_csv(csv_file, index=False)
 print(f"\n\n✓ Saved to: {csv_file}")
 
