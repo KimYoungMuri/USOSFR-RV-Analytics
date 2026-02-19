@@ -357,9 +357,14 @@ Or use the shell script:
 
 ## References
 
-1. VolCube420: [GitHub Repository](https://github.com/yieldcurvemonkey/VolCube420)
-2. JPMorgan: "A primer on Conditional Trades" (May 2016)
-3. Hagan & Konikov: "Volatility Cube Construction" (SABR model)
+1. **VolCube420**: [GitHub Repository](https://github.com/yieldcurvemonkey/VolCube420) - SOFR OIS swaption volatility cube data
+2. **Nomura**: "US Vol RV Analytics Report Primer" (March 2011) - Vol surface monitoring and strike skew analysis
+3. **BofA**: "US Rates US Vol Primer: A Guide for the Perplexed" (March 2024) - Rates volatility basics, swaption grid dynamics, and macro views
+4. **JPMorgan**: "Midcurve options primer: Mechanics, fair value analysis, typical trades, and JPM analytics" (May 2015) - Midcurve options pricing and fair value estimation
+5. **JPMorgan**: "A primer on Conditional Trades: Setting the curve or spread exposure as a function of market direction" (May 2016) - Conditional trades and premium neutrality
+6. **JPMorgan**: "Yield Curve Spread Options primer: Mechanics, fair value analysis, typical trades, and JPM analytics" (November 2015) - YCSO pricing and correlation dependency
+7. **Hagan et al.**: "Managing Smile Risk" (SABR model) - Stochastic volatility model for volatility smile/skew
+8. **Hagan & Konikov**: "Volatility Cube Construction" - Volatility cube interpolation and arbitrage-free surface construction
 
 ---
 
