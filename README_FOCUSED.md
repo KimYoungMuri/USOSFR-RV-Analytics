@@ -1,248 +1,175 @@
-# Rates Vol Relative-Value Analytics Dashboard
+# Rates Volatility Relative-Value Analytics
 
-A Python-based analytics system for non-linear rates options trading, focused on identifying rich/cheap volatility opportunities and generating actionable trade recommendations using available market data.
+Python-based analytics system for identifying rich/cheap volatility opportunities in US rates swaptions using implied and realized volatility analysis.
 
-## 🎯 Project Goal
+## Overview
 
-Build a trader-focused dashboard that answers:
-- **Where is volatility rich/cheap?**
-- **What structures should I trade?**
-- **How does implied vol compare to realized?**
+The system processes daily swaption volatility data and SOFR swap rates to compute:
+- Implied vs realized volatility comparisons
+- Z-score based rich/cheap identification
+- Volatility surface structure analysis
+- Conditional curve trade opportunities
 
-This is a **trader-decision tool** built with **available data sources**.
+## Data Sources
 
----
-
-## 📋 Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [Available Data Sources](#available-data-sources)
-3. [Module Specifications](#module-specifications)
-4. [Implementation Priority](#implementation-priority)
-5. [Technical Stack](#technical-stack)
-6. [Project Structure](#project-structure)
-
----
-
-## 🏗️ Project Overview
-
-### Core Philosophy
-
-This system replicates the daily workflow of a non-linear rates options desk using **real, accessible data**:
-
-1. **Monitor Surface** - Track vol levels and changes
-2. **Compute Signals** - Identify rich/cheap opportunities
-3. **Suggest Trades** - Generate actionable recommendations
-
-### Key Principles
-
-- ✅ **Trader-focused**: Actionable insights, not academic models
-- ✅ **Data-driven**: Built with available market data
-- ✅ **Incremental**: Start with core, add enhancements
-- ✅ **Practical**: Daily workflow tool
-
----
-
-## 📊 Available Data Sources
-
-### 1. **VolCube420 - Swaption Volatility Data**
+### VolCube420
 - **Source**: [GitHub - yieldcurvemonkey/VolCube420](https://github.com/yieldcurvemonkey/VolCube420)
-- **Content**: SOFR OIS Swaption Volatility Cube Data
+- **Content**: SOFR OIS swaption volatility cube
 - **Format**: Daily JSON files (NY EOD marks)
 - **Coverage**: 
-  - Option Tenors: 1M, 3M, 6M, 1Y, 2Y, etc.
-  - Swap Tenors: 1Y, 2Y, 3Y, 4Y, 5Y, 6Y, 7Y, 8Y, 9Y, 10Y, 15Y, 20Y, 25Y, 30Y
-  - Strike Offsets: -200, -100, -50, -25, -10, 0, 10, 25, 50, 100, 200 bps
-- **Vol Type**: Normal Vol (annualized)
-- **Historical**: Daily data from 2024 onwards
-- **Note**: Includes SABR-calibrated data with bilinear interpolation
+  - Option tenors: 1M, 3M, 6M, 1Y, 2Y
+  - Swap tenors: 1Y, 2Y, 3Y, 4Y, 5Y, 6Y, 7Y, 8Y, 9Y, 10Y, 15Y, 20Y, 25Y, 30Y
+  - Strike offsets: -200, -100, -50, -25, -10, 0, 10, 25, 50, 100, 200 bps
+- **Vol Type**: Normal volatility (annualized)
+- **Historical**: Daily data from 2017 onwards
 
-### 2. **SOFR Swap Rate History**
-- **Source**: Market data provider (Bloomberg, Refinitiv, or internal)
-- **Content**: SOFR swap rates
+### SOFR Swap Rates
 - **Tenors**: 1Y, 2Y, 3Y, 4Y, 5Y, 6Y, 7Y, 8Y, 9Y, 10Y, 15Y, 20Y, 25Y, 30Y
 - **Frequency**: Daily
 - **Use Cases**: 
   - Realized volatility calculation
-  - Rate/vol correlation
+  - Rate/vol correlation analysis
   - Directionality analysis
 
-### 3. **MOVE Index**
-- **Source**: Market data provider
+### MOVE Index
 - **Content**: ICE BofA MOVE Index (Treasury volatility index)
 - **Frequency**: Daily
 - **Use Case**: Macro regime context, MOVE vs swaption vol comparison
 
----
+## Module Specifications
 
-## 🧱 Module Specifications
+### MODULE 1: Vol Surface Monitor
 
-### **MODULE 1: Vol Surface Monitor** (Nomura-style) ⭐ **CORE**
+**Status**: Implemented
 
-**Priority**: **HIGHEST** - This is the foundation of the entire system
-
-**Purpose**: Daily monitoring of swaption volatility surface with rich/cheap identification
-
-**Key Features**:
+**Features**:
 
 1. **Daily Swaption Grid Table**
    - ATM swaption vols from VolCube420
    - Option tenors: 1M, 3M, 6M, 1Y, 2Y
-   - Swap tenors: 2Y, 5Y, 10Y, 30Y (key points)
-   - Annualized normal vol
-   - Daily basis point vol (divide by √252)
+   - Swap tenors: 2Y, 5Y, 10Y, 30Y
+   - Annualized normal vol and daily basis point vol (annualized / √252)
 
 2. **Change Analysis**
-   - **1-day change**: Today vs yesterday
-   - **1-week change**: Today vs 5 business days ago
-   - **1-month change**: Today vs 20 business days ago
-   - Highlight largest movers
+   - 1-day change: Today vs yesterday
+   - 1-week change: Today vs 5 business days ago
+   - 1-month change: Today vs 20 business days ago
+   - Largest movers identification
 
 3. **Z-Score Analysis**
-   - 60-day rolling z-scores for each swaption point
-   - Formula: `z = (current - mean) / std`
-   - Color-coded heatmap (red = rich, green = cheap)
-   - Statistical significance flags (|z| > 2)
+   - 60-day rolling z-scores: `z = (current - mean) / std`
+   - Rich/cheap flags: z > 1.3 (rich), z < -1.3 (cheap)
+   - 20-day rolling high/low levels
 
 4. **Implied vs Realized Vol**
-   - **Implied vol**: Current market vol from VolCube420
-   - **Realized vol**: Calculate from SOFR swap rate history
-   - **Horizons**: 10d, 20d, 60d, 90d, 120d, 180d
-   - **Ratio**: Implied / Realized
-   - **Z-scores**: For implied/realized ratios
+   - Implied vol: Current market vol from VolCube420
+   - Realized vol: Calculated from SOFR swap rate history using basis point changes
+   - Horizons: 10d, 20d, 60d, 90d, 120d, 180d
+   - Ratio: Implied / Realized
 
 5. **Mover Table**
    - Largest daily/weekly/monthly movers
-   - Highlighted with conditional formatting
    - Ranked by absolute change
 
 **Outputs**:
-- Formatted Excel table (Nomura-style)
-- Heatmap visualizations
-- Time series charts
-- Rich/cheap signals
+- Formatted Excel table with conditional formatting
+- HTML table for web interface
+- CSV export
 
-**Data Requirements**:
-- ✅ VolCube420 (ATM vols)
-- ✅ SOFR swap rate history (for realized vol)
-
-**References**: Nomura US Vol RV Analytics Report
+**Implementation**: `src/modules/swaption_vol_table.py`
 
 ---
 
-### **MODULE 2: Conditional Curve Trade Screener** (JPMorgan-style) ⭐ **CORE**
+### MODULE 2: Conditional Curve Trade Screener
 
-**Priority**: **HIGHEST** - Very desk-relevant, traders love this
+**Status**: Planned
 
-**Purpose**: Identify and construct zero-cost conditional curve trades
+**Features**:
 
-**Key Features**:
-
-1. **Curve Pairs Focus**
-   - **2s/10s**: Primary focus
-   - **5s/30s**: Secondary focus
-   - Additional pairs as data allows
+1. **Curve Pairs**
+   - Primary: 2s/10s
+   - Secondary: 5s/30s
 
 2. **Directionality Analysis**
-   - **Implied directionality**: Extract from vol structure
-     - Compare long-end vol vs short-end vol
-     - Higher long-end vol → bear-steepening implied
-   - **Delivered directionality**: Historical analysis
-     - Calculate: When rates move, does curve steepen or flatten?
-     - Track: Bear-steepen vs bull-flatten patterns
-   - **Mispricing signal**: Delivered - Implied
-   - **Success rate**: Historical performance tracking
+   - Implied directionality: Extract from vol structure (long-end vol vs short-end vol)
+   - Delivered directionality: Historical correlation between rate moves and curve changes
+   - Mispricing signal: Delivered - Implied
+   - Success rate: Historical performance tracking
 
 3. **Conditional Trade Construction**
-   - **Bear Steepener**: Buy payer on long end (10Y/30Y) vs sell payer on short end (2Y/5Y)
-   - **Bull Flattener**: Buy receiver on long end vs sell receiver on short end
-   - **Premium neutrality**: Calculate zero-cost structures
-   - **Trade recommendations**: With P&L scenarios
+   - Bear steepener: Buy payer on long end vs sell payer on short end
+   - Bull flattener: Buy receiver on long end vs sell receiver on short end
+   - Premium neutrality: Zero-cost structure calculation
 
 4. **Regime Analysis**
-   - **On-hold CB regime**: Back-end driven (bear-steepen/bull-flatten)
-   - **Active CB regime**: Front-end driven (bear-flatten/bull-steepen)
-   - **Current regime identification**
+   - On-hold CB regime: Back-end driven (bear-steepen/bull-flatten)
+   - Active CB regime: Front-end driven (bear-flatten/bull-steepen)
 
 **Outputs**:
 - Trade recommendation table
 - Directionality charts
 - Premium-neutral trade structures
-- P&L scenario analysis
 
-**Data Requirements**:
-- ✅ VolCube420 (for vol structure)
-- ✅ SOFR swap rate history (for directionality)
-
-**References**: JPMorgan "A primer on Conditional Trades" (May 2016)
+**References**: 
+- JPMorgan: "A primer on Conditional Trades" (May 2016)
 
 ---
 
-### **MODULE 3: Implied vs Realized Module** ⭐ **CRITICAL**
+### MODULE 3: Implied vs Realized Module
 
-**Priority**: **HIGH** - Critical for gamma decisions, used daily on desks
+**Status**: Planned
 
-**Purpose**: Compare implied volatility to realized volatility distributions
-
-**Key Features**:
+**Features**:
 
 1. **Implied Move Distribution**
    - Extract from current vol surface
-   - Calculate expected move distribution
+   - Expected move distribution
    - Percentile analysis (1-day, 1-week, 1-month)
 
 2. **Realized Distribution**
    - Historical realized moves
    - Rolling windows: 10d, 20d, 60d, 90d
-   - Percentile analysis
-   - Distribution shape (normal, fat tails, etc.)
+   - Percentile analysis: 50th, 75th, 90th, 95th, 99th
+   - Distribution shape analysis
 
 3. **Comparison Analysis**
-   - **Implied vs Realized**: Overlay distributions
-   - **Percentile comparison**: 50th, 75th, 90th, 95th, 99th
-   - **Tail analysis**: Extreme moves
-   - **Z-scores**: For current implied vs historical realized
+   - Implied vs realized distribution overlay
+   - Percentile comparison
+   - Tail analysis for extreme moves
+   - Z-scores for current implied vs historical realized
 
 4. **Gamma Decision Support**
-   - **Rich vol**: Implied > Realized → Sell gamma
-   - **Cheap vol**: Implied < Realized → Buy gamma
-   - **Signal strength**: Statistical significance
+   - Rich vol: Implied > Realized → Sell gamma signal
+   - Cheap vol: Implied < Realized → Buy gamma signal
 
 **Outputs**:
 - Distribution comparison charts
 - Percentile tables
 - Rich/cheap signals
-- Gamma trade recommendations
-
-**Data Requirements**:
-- ✅ VolCube420 (implied vols)
-- ✅ SOFR swap rate history (realized moves)
 
 ---
 
-### **MODULE 4: Vol Surface Structure** ⭐ **IMPORTANT**
+### MODULE 4: Vol Surface Structure
 
-**Priority**: **MEDIUM** - Important but fast to add
+**Status**: Planned
 
-**Purpose**: Analyze vol surface structure and term structure dynamics
-
-**Key Features**:
+**Features**:
 
 1. **Term Structure Analysis**
-   - **Vol term structure**: Vol vs expiry (1M → 2Y)
-   - **Slope**: Short-dated vs long-dated vol
-   - **Curvature**: Term structure shape
-   - **Roll-down**: Vol decay over time
+   - Vol term structure: Vol vs expiry (1M → 2Y)
+   - Slope: Short-dated vs long-dated vol
+   - Curvature: Term structure shape
+   - Roll-down: Vol decay over time
 
 2. **Curve Vol Spreads**
-   - **Front vs Long Gamma**: 1M/3M vs 1Y/2Y vol
-   - **Vol spread analysis**: Compare across expiries
-   - **Relative value**: Rich/cheap across term structure
+   - Front vs long gamma: 1M/3M vs 1Y/2Y vol
+   - Vol spread analysis across expiries
+   - Relative value identification
 
 3. **Surface Shape Analysis**
-   - **Skew**: From strike offsets in VolCube420
-   - **Smile**: Vol curvature across strikes
-   - **Surface visualization**: 3D surface plots
+   - Skew: From strike offsets in VolCube420
+   - Smile: Vol curvature across strikes
+   - Surface visualization: 3D surface plots
 
 4. **Historical Comparison**
    - Term structure evolution
@@ -253,20 +180,14 @@ This system replicates the daily workflow of a non-linear rates options desk usi
 - Term structure charts
 - Vol spread tables
 - Surface visualizations
-- Rich/cheap signals
-
-**Data Requirements**:
-- ✅ VolCube420 (full strike structure)
 
 ---
 
-### **MODULE 5: MOVE vs Swaption Vol** ⭐ **EASY ADD**
+### MODULE 5: MOVE vs Swaption Vol
 
-**Priority**: **LOW** - Easy add, macro context
+**Status**: Planned
 
-**Purpose**: Compare MOVE index (Treasury vol) to swaption vol for macro regime context
-
-**Key Features**:
+**Features**:
 
 1. **MOVE Index Tracking**
    - Daily MOVE index levels
@@ -274,142 +195,60 @@ This system replicates the daily workflow of a non-linear rates options desk usi
    - Z-scores
 
 2. **Swaption Vol Comparison**
-   - **Key points**: 1Y10Y, 2Y10Y (most liquid)
-   - **Ratio**: MOVE / Swaption Vol
-   - **Historical relationship**: Correlation and spread
+   - Key points: 1Y10Y, 2Y10Y
+   - Ratio: MOVE / Swaption Vol
+   - Historical relationship: Correlation and spread
 
 3. **Regime Analysis**
-   - **High MOVE / Low Swaption**: Macro stress, rates vol cheap
-   - **Low MOVE / High Swaption**: Idiosyncratic rates vol rich
-   - **Regime identification**: Current state
-
-4. **Macro Context**
-   - **Treasury vol vs Rates vol**: Different drivers
-   - **Cross-asset signals**: What MOVE tells us about rates vol
+   - High MOVE / Low Swaption: Macro stress, rates vol cheap
+   - Low MOVE / High Swaption: Idiosyncratic rates vol rich
 
 **Outputs**:
 - MOVE vs Swaption vol chart
 - Ratio analysis
 - Regime signals
 
-**Data Requirements**:
-- ✅ MOVE Index (daily)
-- ✅ VolCube420 (swaption vols)
-
 ---
 
-### **MODULE 6: Midcurve RV Monitor** (Simplified) ⭐ **PARTIAL**
+### MODULE 6: Midcurve RV Monitor (Simplified)
 
-**Priority**: **MEDIUM** - Simplified version, no full pricing engine
+**Status**: Planned
 
-**Purpose**: Identify relative value in forward-starting structures
-
-**Key Features**:
+**Features**:
 
 1. **Forward Starting Implied Vols** (Approximate)
-   - **1Y10Y vs 3M10Y**: Compare forward-starting to spot-starting
-   - **1M5Y vs 6M5Y**: Similar comparisons
-   - **Approximation**: Use term structure interpolation
-   - **No full pricing**: Skip correlation-dependent fair value
+   - 1Y10Y vs 3M10Y: Compare forward-starting to spot-starting
+   - 1M5Y vs 6M5Y: Similar comparisons
+   - Approximation using term structure interpolation
 
 2. **Term Structure Comparisons**
-   - **Calendar spreads**: Compare expiries
-   - **Forward vol**: Extract from term structure
-   - **Dislocations**: Identify rich/cheap forward vol
+   - Calendar spreads: Compare expiries
+   - Forward vol: Extract from term structure
+   - Dislocations: Identify rich/cheap forward vol
 
 3. **Gamma vs Vega Comparisons**
-   - **Short expiry**: More gamma, less vega
-   - **Long expiry**: Less gamma, more vega
-   - **Relative value**: Compare across expiries
+   - Short expiry: More gamma, less vega
+   - Long expiry: Less gamma, more vega
 
 4. **Implied vs Realized by Expiry**
-   - **1M realized**: Short-term realized vol
-   - **1Y realized**: Longer-term realized vol
-   - **Comparison**: Implied vs realized by expiry
+   - 1M realized: Short-term realized vol
+   - 1Y realized: Longer-term realized vol
 
 5. **Vol Curve Dislocations**
-   - **1Y10Y vs 3M10Y**: Forward-starting rich/cheap
-   - **1M5Y vs 6M5Y**: Similar analysis
-   - **Simplified RV**: Without full correlation pricing
+   - 1Y10Y vs 3M10Y: Forward-starting rich/cheap
+   - 1M5Y vs 6M5Y: Similar analysis
+
+**Note**: Simplified version without full correlation-dependent pricing.
 
 **Outputs**:
 - Forward vol comparison table
 - Term structure dislocation signals
-- Simplified RV signals
-
-**Data Requirements**:
-- ✅ VolCube420 (multiple expiries)
-- ✅ SOFR swap rate history (for realized by expiry)
-
-**Note**: This is a **simplified** version. Full midcurve pricing requires correlation data which we don't have. This module focuses on term structure and forward vol analysis.
 
 ---
 
-## 🎯 Implementation Priority
+## Technical Stack
 
-### **Phase 1: Core Foundation (Weeks 1-3)**
-
-**Week 1: Data Pipeline & Module 1 (Part 1)**
-- [ ] Set up data pipeline (VolCube420, SOFR rates, MOVE)
-- [ ] Build data loader and validator
-- [ ] Implement basic vol surface table
-- [ ] Calculate daily/weekly/monthly changes
-
-**Week 2: Module 1 (Part 2)**
-- [ ] Implement z-score calculations
-- [ ] Build implied vs realized vol analysis
-- [ ] Create heatmaps and visualizations
-- [ ] Build mover identification
-
-**Week 3: Module 3 - Implied vs Realized**
-- [ ] Implement implied move distribution
-- [ ] Build realized distribution analysis
-- [ ] Create comparison charts
-- [ ] Generate gamma signals
-
-**Deliverable**: Working Vol Surface Monitor + Implied vs Realized
-
----
-
-### **Phase 2: Trade Screener (Weeks 4-5)**
-
-**Week 4: Module 2 (Part 1)**
-- [ ] Implement directionality calculation (implied)
-- [ ] Build historical directionality tracking
-- [ ] Create mispricing signal
-- [ ] Analyze 2s/10s and 5s/30s
-
-**Week 5: Module 2 (Part 2)**
-- [ ] Build conditional trade construction
-- [ ] Implement premium neutrality calculator
-- [ ] Create trade recommendations
-- [ ] Build P&L scenarios
-
-**Deliverable**: Complete Conditional Curve Trade Screener
-
----
-
-### **Phase 3: Enhancements (Weeks 6-7)**
-
-**Week 6: Module 4 - Vol Surface Structure**
-- [ ] Implement term structure analysis
-- [ ] Build vol spread calculations
-- [ ] Create surface visualizations
-- [ ] Add historical comparison
-
-**Week 7: Module 5 & 6**
-- [ ] Implement MOVE vs Swaption vol
-- [ ] Build simplified Midcurve RV monitor
-- [ ] Create forward vol analysis
-- [ ] Dashboard integration
-
-**Deliverable**: Complete system with all modules
-
----
-
-## 🛠️ Technical Stack
-
-### **Core Libraries**
+### Core Libraries
 
 ```python
 # Data Processing
@@ -420,198 +259,108 @@ scipy>=1.10.0
 # Visualization
 matplotlib>=3.7.0
 seaborn>=0.12.0
-plotly>=5.14.0  # Optional, for interactive charts
+plotly>=5.14.0
 
 # Data Access
-requests>=2.31.0  # For GitHub API (VolCube420)
-gitpython>=3.1.0  # For cloning VolCube420 repo
+requests>=2.31.0
+openpyxl>=3.1.0
 
-# Reporting
-openpyxl>=3.1.0  # Excel output
-jinja2>=3.1.0    # HTML templates
-
-# Database (optional)
-sqlite3  # Built-in, for historical data storage
+# UI
+streamlit>=1.28.0
 ```
 
-### **Data Access Strategy**
-
-1. **VolCube420**: Clone GitHub repo or download JSON files
-2. **SOFR Rates**: API access or CSV files
-3. **MOVE Index**: API access or CSV files
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-rates_vol_rv_analytics/
-│
-├── README_FOCUSED.md          # This file
-├── requirements.txt
-│
-├── data/
-│   ├── raw/
-│   │   ├── volcube420/        # Cloned or downloaded VolCube420 data
-│   │   ├── sofr_rates/        # SOFR swap rate history
-│   │   └── move_index/       # MOVE index data
-│   ├── processed/            # Cleaned and processed data
-│   └── historical/           # Historical database (SQLite)
-│
+US Vol RV Analytics/
 ├── src/
-│   ├── __init__.py
 │   ├── data/
-│   │   ├── data_loader.py    # Load VolCube420, SOFR, MOVE
-│   │   ├── data_validator.py
-│   │   └── database.py       # Historical data storage
-│   │
+│   │   └── data_loader.py        # VolCube420 and SOFR loaders
 │   ├── calculations/
-│   │   ├── volatility.py     # Realized vol calculations
-│   │   ├── z_scores.py       # Z-score calculations
-│   │   ├── directionality.py # Directionality analysis
-│   │   └── distributions.py  # Implied vs realized distributions
-│   │
+│   │   └── volatility.py         # Volatility calculations
 │   ├── modules/
-│   │   ├── module1_vol_surface.py      # Vol Surface Monitor
-│   │   ├── module2_conditional_trades.py # Conditional Trade Screener
-│   │   ├── module3_implied_realized.py  # Implied vs Realized
-│   │   ├── module4_vol_structure.py     # Vol Surface Structure
-│   │   ├── module5_move_comparison.py  # MOVE vs Swaption
-│   │   └── module6_midcurve_rv.py      # Simplified Midcurve RV
-│   │
-│   ├── visualization/
-│   │   ├── heatmaps.py
-│   │   ├── time_series.py
-│   │   └── distributions.py
-│   │
+│   │   ├── swaption_vol_table.py  # Core swaption vol table
+│   │   └── get_swaption_table.py  # Convenience functions
 │   ├── reporting/
-│   │   ├── excel_report.py   # Nomura-style Excel output
-│   │   ├── html_report.py    # HTML dashboard
-│   │   └── dashboard.py      # Main dashboard
-│   │
+│   │   ├── excel_formatter.py    # Excel export
+│   │   └── html_table_formatter.py # HTML formatter
 │   └── utils/
-│       ├── config.py
-│       └── helpers.py
-│
-├── tests/
-│   ├── test_calculations.py
-│   └── test_modules.py
-│
-└── notebooks/
-    ├── data_exploration.ipynb
-    └── validation.ipynb
+│       └── config.py              # Configuration
+├── data/
+│   ├── raw/volcube420/            # Cached VolCube420 data
+│   └── historical/               # SOFR Excel files
+├── app.py                         # Streamlit UI
+├── export_table.py                # Excel export script
+└── view_table.py                  # Table viewer
 ```
 
----
+## Key Calculations
 
-## 📊 Key Calculations
+### Realized Volatility
 
-### **1. Realized Volatility**
 ```python
-# Annualized realized vol from daily returns
-realized_vol = returns.std() * np.sqrt(252)
-
-# Rolling windows
-for window in [10, 20, 60, 90, 120, 180]:
-    rolling_vol = returns.rolling(window).std() * np.sqrt(252)
+# Basis point volatility from daily rate changes
+rate_changes = rates.diff()
+realized_vol_bp = rate_changes.rolling(window).std() * np.sqrt(252)
 ```
 
-### **2. Z-Scores**
+### Z-Scores
+
 ```python
 # 60-day rolling z-score
 mean_60d = data.rolling(60).mean()
 std_60d = data.rolling(60).std()
 z_score = (current - mean_60d) / std_60d
+
+# Rich/cheap flags
+rich = z_score > 1.3
+cheap = z_score < -1.3
 ```
 
-### **3. Directionality**
+### Directionality
+
 ```python
 # Implied: Compare long-end vol vs short-end vol
 implied_directionality = long_end_vol / short_end_vol
 
 # Delivered: Historical correlation
-# When rates move, does curve steepen or flatten?
 delivered_directionality = calculate_historical_correlation(
     rate_changes, curve_changes
 )
 ```
 
-### **4. Implied vs Realized Distribution**
-```python
-# Implied: From vol surface
-implied_dist = extract_from_vol_surface(current_vol)
+## Usage
 
-# Realized: Historical moves
-realized_dist = calculate_historical_moves(swap_rates, window=60)
-```
-
----
-
-## 🎓 Key References
-
-1. **Nomura**: "US Vol RV Analytics Report Primer" (March 2011)
-2. **JPMorgan**: "A primer on Conditional Trades" (May 2016)
-3. **BofA**: "US Vol Primer: A Guide for the Perplexed" (March 2024)
-4. **VolCube420**: [GitHub Repository](https://github.com/yieldcurvemonkey/VolCube420)
-
----
-
-## 🚀 Getting Started
-
-### **Step 1: Clone VolCube420 Data**
+### View Table
 
 ```bash
-# Option 1: Clone the repo
-git clone https://github.com/yieldcurvemonkey/VolCube420.git data/raw/volcube420
-
-# Option 2: Download specific date files via GitHub API
+python view_table.py --date 2024-12-31
 ```
 
-### **Step 2: Set Up Environment**
+### Export to Excel
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+python export_table.py --date 2024-12-31
 ```
 
-### **Step 3: Configure Data Sources**
-
-1. Set up SOFR swap rate data source
-2. Set up MOVE index data source
-3. Configure data paths in `src/utils/config.py`
-
-### **Step 4: Run Daily Report**
+### Run UI
 
 ```bash
-python src/reporting/dashboard.py --date 2024-01-15
+streamlit run app.py
 ```
 
----
+Or use the shell script:
 
-## 📝 Notes
+```bash
+./run_ui.sh
+```
 
-- **Data Availability**: Confirm SOFR rates and MOVE index access early
-- **Incremental Build**: Start with Module 1, then add others
-- **Validation**: Cross-check calculations with known values
-- **Performance**: Optimize for daily batch processing
-- **Maintainability**: Write clean, documented code
+## References
 
----
-
-## ✅ Success Criteria
-
-A successful project will:
-1. ✅ Generate daily vol surface monitor (Module 1)
-2. ✅ Identify conditional curve trade opportunities (Module 2)
-3. ✅ Compare implied vs realized distributions (Module 3)
-4. ✅ Analyze vol surface structure (Module 4)
-5. ✅ Provide MOVE context (Module 5)
-6. ✅ Identify simplified midcurve RV (Module 6)
-7. ✅ Produce trader-friendly outputs (Excel, HTML)
+1. VolCube420: [GitHub Repository](https://github.com/yieldcurvemonkey/VolCube420)
+2. JPMorgan: "A primer on Conditional Trades" (May 2016)
+3. Hagan & Konikov: "Volatility Cube Construction" (SABR model)
 
 ---
 
-**Last Updated**: January 2024
-**Status**: Focused MVP Scope
-**Data Sources**: VolCube420, SOFR Rates, MOVE Index
+**Last Updated**: January 2025
