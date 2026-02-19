@@ -12,7 +12,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.modules.get_swaption_table import get_swaption_table, get_swaption_table_latest
+from src.get_swaption_table import get_swaption_table, get_swaption_table_latest
 
 # Get date from command line or use latest
 if len(sys.argv) > 1:

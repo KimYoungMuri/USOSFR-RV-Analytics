@@ -15,13 +15,13 @@ The system processes daily swaption volatility data and SOFR swap rates to compu
 ### VolCube420
 - **Source**: [GitHub - yieldcurvemonkey/VolCube420](https://github.com/yieldcurvemonkey/VolCube420)
 - **Content**: SOFR OIS swaption volatility cube
-- **Format**: Daily JSON files (NY EOD marks)
+- **Format**: Daily JSON files (NY EOD marks) - loaded from local cache in `data/raw/volcube420/`
 - **Coverage**: 
   - Option tenors: 1M, 3M, 6M, 1Y, 2Y
   - Swap tenors: 1Y, 2Y, 3Y, 4Y, 5Y, 6Y, 7Y, 8Y, 9Y, 10Y, 15Y, 20Y, 25Y, 30Y
   - Strike offsets: -200, -100, -50, -25, -10, 0, 10, 25, 50, 100, 200 bps
 - **Vol Type**: Normal volatility (annualized)
-- **Historical**: Daily data from 2017 onwards
+- **Historical**: Daily data from 2017 onwards (cached locally)
 
 ### SOFR Swap Rates
 - **Tenors**: 1Y, 2Y, 3Y, 4Y, 5Y, 6Y, 7Y, 8Y, 9Y, 10Y, 15Y, 20Y, 25Y, 30Y
@@ -262,7 +262,6 @@ seaborn>=0.12.0
 plotly>=5.14.0
 
 # Data Access
-requests>=2.31.0
 openpyxl>=3.1.0
 
 # UI
@@ -274,18 +273,13 @@ streamlit>=1.28.0
 ```
 US Vol RV Analytics/
 ├── src/
-│   ├── data/
-│   │   └── data_loader.py        # VolCube420 and SOFR loaders
-│   ├── calculations/
-│   │   └── volatility.py         # Volatility calculations
-│   ├── modules/
-│   │   ├── swaption_vol_table.py  # Core swaption vol table
-│   │   └── get_swaption_table.py  # Convenience functions
-│   ├── reporting/
-│   │   ├── excel_formatter.py    # Excel export
-│   │   └── html_table_formatter.py # HTML formatter
-│   └── utils/
-│       └── config.py              # Configuration
+│   ├── data_loader.py             # VolCube420 and SOFR loaders
+│   ├── volatility.py              # Volatility calculations
+│   ├── swaption_vol_table.py      # Core swaption vol table
+│   ├── get_swaption_table.py      # Convenience functions
+│   ├── excel_formatter.py         # Excel export
+│   ├── html_table_formatter.py    # HTML formatter
+│   └── config.py                  # Configuration
 ├── scripts/
 │   ├── app.py                     # Streamlit UI
 │   ├── export_table.py            # Excel export script

@@ -4,16 +4,14 @@ Data loaders for VolCube420 and SOFR swap rate data
 import pandas as pd
 import numpy as np
 import json
-import requests
 from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime, date
 import warnings
 
-from src.utils.config import (
+from src.config import (
     HISTORICAL_DATA_DIR,
     SOFR_FILES,
-    VOLCUBE420_ATM_TIMESERIES_URL,
     OPTION_TENORS,
     SWAP_TENORS,
 )
@@ -28,7 +26,7 @@ class VolCube420Loader:
     
     def load_atm_timeseries(self, year: int = 2024) -> pd.DataFrame:
         """
-        Load ATM timeseries data from VolCube420 GitHub repo
+        Load ATM timeseries data from local cached files
         
         Args:
             year: Year to load (default: 2024)
@@ -36,24 +34,17 @@ class VolCube420Loader:
         Returns:
             DataFrame with columns: date, option_tenor, swap_tenor, normal_vol
         """
-        url = f"{VOLCUBE420_ATM_TIMESERIES_URL}/{year}.json"
         cache_file = self.cache_dir / f"atm_timeseries_{year}.json"
         
-        # Try to load from cache first
-        if cache_file.exists():
-            with open(cache_file, 'r') as f:
-                data = json.load(f)
-        else:
-            # Download from GitHub
-            try:
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()
-                data = response.json()
-                # Cache it
-                with open(cache_file, 'w') as f:
-                    json.dump(data, f)
-            except Exception as e:
-                raise ValueError(f"Failed to load VolCube420 data: {e}")
+        # Load from local cache file
+        if not cache_file.exists():
+            raise FileNotFoundError(
+                f"VolCube420 data file not found: {cache_file}\n"
+                f"Please ensure the file exists in {self.cache_dir}"
+            )
+        
+        with open(cache_file, 'r') as f:
+            data = json.load(f)
         
         # Parse JSON structure
         # Format: {date: [{Option Tenor, 1Y, 2Y, ...}, ...]}

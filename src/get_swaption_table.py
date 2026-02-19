@@ -19,9 +19,9 @@ import pandas as pd
 from datetime import date
 from typing import Optional
 
-from src.modules.swaption_vol_table import build_swaption_vol_table
-from src.data.data_loader import VolCube420Loader, SOFRLoader
-from src.reporting.excel_formatter import format_swaption_vol_table_excel
+from src.swaption_vol_table import build_swaption_vol_table
+from src.data_loader import VolCube420Loader, SOFRLoader
+from src.excel_formatter import format_swaption_vol_table_excel
 
 
 # Cache data loaders

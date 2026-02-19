@@ -9,8 +9,7 @@ seaborn>=0.12.0
 plotly>=5.14.0
 
 # Data Access
-requests>=2.31.0
-gitpython>=3.1.0
+# (VolCube420 data loaded from local cache files)
 
 # Reporting
 openpyxl>=3.1.0

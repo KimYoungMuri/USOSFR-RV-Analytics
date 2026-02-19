@@ -11,7 +11,7 @@ from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.data.data_loader import SOFRLoader
+from src.data_loader import SOFRLoader
 
 print("Loading SOFR swap rates...")
 loader = SOFRLoader()

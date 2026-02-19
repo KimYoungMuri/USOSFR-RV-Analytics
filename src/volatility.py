@@ -6,7 +6,7 @@ import numpy as np
 from typing import List, Optional
 from datetime import date, timedelta
 
-from src.utils.config import TRADING_DAYS_PER_YEAR, REALIZED_VOL_WINDOWS
+from src.config import TRADING_DAYS_PER_YEAR, REALIZED_VOL_WINDOWS
 
 
 def calculate_realized_vol(

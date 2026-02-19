@@ -9,7 +9,7 @@ import numpy as np
 from datetime import date, timedelta
 from typing import Optional
 
-from src.utils.config import OPTION_TENORS, SWAP_TENORS, REALIZED_VOL_WINDOWS
+from src.config import OPTION_TENORS, SWAP_TENORS, REALIZED_VOL_WINDOWS
 
 
 def compute_implied_vol_changes(

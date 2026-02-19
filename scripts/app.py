@@ -12,8 +12,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.modules.get_swaption_table import get_swaption_table, get_swaption_table_latest, _load_data
-from src.reporting.html_table_formatter import format_table_html
+from src.get_swaption_table import get_swaption_table, get_swaption_table_latest, _load_data
+from src.html_table_formatter import format_table_html
 
 # Page config
 st.set_page_config(

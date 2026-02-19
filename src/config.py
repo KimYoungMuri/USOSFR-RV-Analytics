@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 # Project root directory
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent
 
 # Data directories
 DATA_DIR = PROJECT_ROOT / "data"
@@ -13,9 +13,7 @@ RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 HISTORICAL_DATA_DIR = DATA_DIR / "historical"
 
-# VolCube420 data
-VOLCUBE420_REPO_URL = "https://github.com/yieldcurvemonkey/VolCube420"
-VOLCUBE420_ATM_TIMESERIES_URL = "https://raw.githubusercontent.com/yieldcurvemonkey/VolCube420/main/atm_timeseries"
+# VolCube420 data (loaded from local cache in data/raw/volcube420/)
 
 # SOFR swap rate files
 SOFR_FILES = {
