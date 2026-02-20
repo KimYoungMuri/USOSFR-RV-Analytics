@@ -10,6 +10,23 @@ The system processes daily swaption volatility data and SOFR swap rates to compu
 - Volatility surface structure analysis
 - Conditional curve trade opportunities
 
+## UI Screenshot
+
+The Streamlit web interface provides an interactive dashboard for viewing the swaption volatility table:
+
+![Vol Monitor Dashboard](docs/images/vol_monitor_dashboard.png)
+
+**Features shown:**
+- Date selection with quick access buttons (Latest, 1 Week Ago)
+- Swaption vol table with three main sections:
+  - Implied Basis Point Volatility (Annualized): Current levels, 1d/1w/1m changes, 20d high/low
+  - Implied Basis Point Volatility (Daily): Daily equivalents of annualized metrics
+  - Realized Basis Point Volatility: 10d, 20d, 60d, 90d, 120d, 180d horizons
+- Visual indicators:
+  - Dark gray cells = Largest movers (1d, 1w, 1m)
+  - Negative values displayed in parentheses
+  - 20 swaption combinations (1M/3M/6M/1Y/2Y × 2Y/5Y/10Y/30Y)
+
 ## Data Sources
 
 ### VolCube420
@@ -287,6 +304,8 @@ US Vol RV Analytics/
 │   ├── plot_sofr_rates.py         # SOFR rates plotting
 │   └── test_swaption_table_simple.py # Test script
 ├── docs/
+│   ├── images/                    # Screenshots and images
+│   │   └── vol_monitor_dashboard.png  # UI screenshot
 │   ├── README_FOCUSED.md          # Detailed project plan
 │   ├── UI_GUIDE.md                # UI usage guide
 │   ├── USAGE.md                   # Usage documentation
