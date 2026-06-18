@@ -35,3 +35,12 @@ TRADING_DAYS_PER_YEAR = 252
 # Z-score thresholds
 Z_SCORE_RICH = 1.3
 Z_SCORE_CHEAP = -1.3
+
+# VolCube420 strike offsets (bp from ATMF)
+STRIKE_OFFSETS_BP = [-200, -100, -50, -25, -10, 0, 10, 25, 50, 100, 200]
+
+# VolCube420 daily cube (for skew/smile and SABR)
+VOLCUBE420_DAILY_URL = "https://raw.githubusercontent.com/yieldcurvemonkey/VolCube420/main/{date}.json"
+
+# SABR defaults (rates convention)
+SABR_BETA = 0.5

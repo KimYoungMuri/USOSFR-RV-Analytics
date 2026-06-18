@@ -8,7 +8,14 @@ from pathlib import Path
 from datetime import datetime, date
 import warnings
 
-from src.config import HISTORICAL_DATA_DIR, SOFR_FILES, OPTION_TENORS, SWAP_TENORS
+from src.config import (
+    HISTORICAL_DATA_DIR,
+    SOFR_FILES,
+    OPTION_TENORS,
+    SWAP_TENORS,
+    STRIKE_OFFSETS_BP,
+    VOLCUBE420_DAILY_URL,
+)
 
 
 class VolCube420Loader:
@@ -61,6 +68,98 @@ class VolCube420Loader:
             raise ValueError(f"No data found for year {year}")
         
         return df.sort_values(["date", "option_tenor", "swap_tenor"])
+    
+    def load_all_atm_timeseries(self, years=None):
+        """Load ATM timeseries across multiple years"""
+        if years is None:
+            years = range(2017, 2026)
+        
+        frames = []
+        for year in years:
+            try:
+                frames.append(self.load_atm_timeseries(year))
+            except FileNotFoundError:
+                pass
+        
+        if not frames:
+            raise ValueError("No ATM timeseries data found")
+        
+        return pd.concat(frames, ignore_index=True).sort_values(
+            ["date", "option_tenor", "swap_tenor"]
+        )
+    
+    def _daily_cube_path(self, as_of_date):
+        return self.cache_dir / "daily" / f"{as_of_date}.json"
+    
+    def load_daily_cube(self, as_of_date, download=True):
+        """Load full strike cube for a date (cached locally)"""
+        if isinstance(as_of_date, str):
+            as_of_date = datetime.strptime(as_of_date, "%Y-%m-%d").date()
+        
+        cache_file = self._daily_cube_path(as_of_date)
+        
+        if not cache_file.exists():
+            if not download:
+                raise FileNotFoundError(f"No daily cube cached for {as_of_date}")
+            
+            try:
+                import urllib.request
+                url = VOLCUBE420_DAILY_URL.format(date=as_of_date)
+                cache_file.parent.mkdir(parents=True, exist_ok=True)
+                urllib.request.urlretrieve(url, cache_file)
+            except Exception as e:
+                raise FileNotFoundError(
+                    f"Could not load daily cube for {as_of_date}: {e}"
+                )
+        
+        with open(cache_file, "r") as f:
+            return json.load(f)
+    
+    def load_strike_surface(self, as_of_date, option_tenor=None, swap_tenor=None, download=True):
+        """Load strike vol surface for a date as long-format DataFrame"""
+        cube = self.load_daily_cube(as_of_date, download=download)
+        
+        records = []
+        for offset_str, swaptions in cube.items():
+            try:
+                offset_bp = int(offset_str)
+            except ValueError:
+                continue
+            
+            for swaption in swaptions:
+                opt = swaption.get("Option Tenor", "")
+                if option_tenor and opt != option_tenor:
+                    continue
+                
+                for swap_tenor_str, vol in swaption.items():
+                    if swap_tenor_str == "Option Tenor":
+                        continue
+                    try:
+                        tenor = int(swap_tenor_str.replace("Y", ""))
+                    except ValueError:
+                        continue
+                    
+                    if swap_tenor and tenor != swap_tenor:
+                        continue
+                    if tenor not in SWAP_TENORS:
+                        continue
+                    if opt not in OPTION_TENORS:
+                        continue
+                    
+                    records.append({
+                        "date": as_of_date,
+                        "option_tenor": opt,
+                        "swap_tenor": tenor,
+                        "strike_offset_bp": offset_bp,
+                        "normal_vol": vol,
+                    })
+        
+        if not records:
+            raise ValueError(f"No strike surface data for {as_of_date}")
+        
+        return pd.DataFrame(records).sort_values(
+            ["option_tenor", "swap_tenor", "strike_offset_bp"]
+        )
     
     def load_latest_atm_vol(self, date=None):
         """Load latest ATM vol data"""
